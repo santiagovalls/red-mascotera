@@ -31,6 +31,6 @@ $(document).ready(async function () {
     }
 
     // Redirigir al usuario a la página de pets
-    window.location.href = "/pets/index.html";
+    window.location.href = "pets/index.html";
   });
 });
