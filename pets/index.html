@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Red Mascotera</title>
+    <!-- CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/2.1.4/css/dataTables.dataTables.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Page -->
+    <div class="page">
+      <!-- Navbar -->
+      <header class="navbar navbar-expand-sm navbar-light d-print-none">
+        <div class="container-xl">
+          <h1
+            class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-dog"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M11 5h2" />
+              <path
+                d="M19 12c-.667 5.333 -2.333 8 -5 8h-4c-2.667 0 -4.333 -2.667 -5 -8"
+              />
+              <path d="M11 16c0 .667 .333 1 1 1s1 -.333 1 -1h-2z" />
+              <path d="M12 18v2" />
+              <path d="M10 11v.01" />
+              <path d="M14 11v.01" />
+              <path
+                d="M5 4l6 .97l-6.238 6.688a1.021 1.021 0 0 1 -1.41 .111a.953 .953 0 0 1 -.327 -.954l1.975 -6.815z"
+              />
+              <path
+                d="M19 4l-6 .97l6.238 6.688c.358 .408 .989 .458 1.41 .111a.953 .953 0 0 0 .327 -.954l-1.975 -6.815z"
+              />
+            </svg>
+
+            <a class="ps-2" href="#">Red Mascotera</a>
+          </h1>
+          <div class="navbar-nav flex-row order-md-last">
+            <div class="nav-item">
+              <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-user"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                </svg>
+                <div class="d-none d-xl-block ps-2">
+                  <div id="user-email">-</div>
+                  <div class="mt-1 small text-secondary">Administrador</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- Content -->
+      <div class="page-wrapper">
+        <div class="page-body">
+          <div class="container-xl">
+            <!-- Spinner -->
+            <div id="loading-spinner" class="text-center my-4">
+              <div class="spinner-border" role="status"></div>
+            </div>
+            <!-- Tarjeta de tabla -->
+            <div id="pets-table-card" class="card" style="display: none">
+              <div class="card-body">
+                <table id="pets-table" class="display" style="width: 100%">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Etiqueta</th>
+                      <th>Tipo de Mascota</th>
+                      <th>Estado de Adopción</th>
+                      <th>Fecha de Registro</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Los datos serán llenados dinámicamente desde Supabase -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- Tarjeta de form -->
+            <div id="pets-form-card" class="card" style="display: none">
+              <div class="card-body">
+                <form id="new-pet-form">
+                  <h3>Agregar Nueva Mascota</h3>
+                  <label for="pet-name">Nombre de la Mascota:</label><br />
+                  <input
+                    type="text"
+                    id="pet-name"
+                    name="name"
+                    required
+                  /><br /><br />
+
+                  <label for="pet-tag">Etiqueta:</label><br />
+                  <input
+                    type="text"
+                    id="pet-tag"
+                    name="tag"
+                    required
+                  /><br /><br />
+
+                  <label for="pet-type">Tipo de Mascota:</label><br />
+                  <select id="pet-type" name="type" required>
+                    <!-- Opciones que serán llenadas dinámicamente --></select
+                  ><br /><br />
+
+                  <label for="pet-state">Estado de Adopción:</label><br />
+                  <select id="pet-state" name="state" required>
+                    <!-- Opciones que serán llenadas dinámicamente --></select
+                  ><br /><br />
+
+                  <button type="submit">Agregar Mascota</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.4/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
