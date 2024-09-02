@@ -27,9 +27,12 @@ $(document).ready(async function () {
       supabase.from("pet_types").select("*"),
       supabase.from("pet_states").select("*"),
       supabase.from("pets").select(`
+        id,
+        created_at,
         name,
         tag,
-        created_at,
+        pet_type_id,
+        pet_state_id,
         pet_types (name),
         pet_states (name)
       `),
@@ -84,11 +87,15 @@ $(document).ready(async function () {
         row.pet_types.name || "Desconocido", // Nombre del tipo de mascota
         row.pet_states.name || "Desconocido", // Estado de adopción
         new Date(row.created_at).toLocaleDateString(),
+        `
+        <button class="btn btn-primary edit-btn" data-id="${row.id}" data-bs-toggle="modal" data-bs-target="#pet-modal">Editar</button>
+        <button class="btn btn-danger delete-btn" data-id="${row.id}" data-bs-toggle="modal" data-bs-target="#confirm-delete-modal">Eliminar</button>
+        `,
       ];
     });
 
     // Inicializa DataTables con los datos obtenidos
-    $("#pets-table").DataTable({
+    const table = $("#pets-table").DataTable({
       data: tableData,
       columns: [
         { title: "Nombre" },
@@ -96,26 +103,92 @@ $(document).ready(async function () {
         { title: "Tipo de Mascota" },
         { title: "Estado de Adopción" },
         { title: "Fecha de Registro" },
+        { title: "Acciones" }, // Columna para las acciones
       ],
       paging: true,
       searching: true,
       ordering: true,
+      layout: {
+        topStart: function () {
+          let toolbar = document.createElement("div");
+          toolbar.innerHTML = `<button class="btn btn-primary" id="add-pet-btn" data-bs-toggle="modal" data-bs-target="#pet-modal">Agregar Mascota</button>`;
+          return toolbar;
+        },
+      },
+    });
+
+    // Mostrar modal para agregar nueva mascota
+    $("#add-pet-btn").on("click", function () {
+      $("#pet-modal-label").text("Agregar Mascota");
+      $("#new-pet-form").trigger("reset"); // Limpiar el formulario
+      $("#new-pet-form").removeData("pet-id"); // Quitar el ID del formulario
+    });
+
+    // Manejar el evento de clic en el botón de edición
+    $("#pets-table tbody").on("click", ".edit-btn", function () {
+      const id = $(this).data("id");
+      const selectedData = petsData.find((pet) => pet.id === id);
+
+      if (selectedData) {
+        // Cargar los datos en el formulario
+        $("#pet-modal-label").text("Editar Mascota");
+        $("#pet-name").val(selectedData.name);
+        $("#pet-tag").val(selectedData.tag);
+        $("#pet-type").val(selectedData.pet_type_id);
+        $("#pet-state").val(selectedData.pet_state_id);
+        $("#new-pet-form").data("pet-id", id); // Guardar el ID en el formulario para actualizar
+      }
     });
   }
 
-  // Manejar el envío del formulario para agregar una nueva mascota
+  // Manejar el evento de clic en el botón de eliminación
+  let petIdToDelete = null; // Variable para almacenar el ID de la mascota a eliminar
+
+  $("#pets-table tbody").on("click", ".delete-btn", function () {
+    petIdToDelete = $(this).data("id"); // Almacenar el ID de la mascota para eliminar
+  });
+
+  // Confirmar eliminación
+  $("#confirm-delete-btn").on("click", async function () {
+    if (petIdToDelete) {
+      const { error } = await supabase
+        .from("pets")
+        .delete()
+        .eq("id", petIdToDelete);
+
+      if (error) {
+        console.error("Error deleting pet: ", error);
+        alert("Error al eliminar la mascota: " + error.message);
+      } else {
+        alert("Mascota eliminada exitosamente.");
+        location.reload(); // Recargar la página para mostrar los cambios
+      }
+    }
+  });
+
+  // Manejar el envío del formulario para agregar o actualizar una mascota
   $("#new-pet-form").on("submit", async function (event) {
     event.preventDefault();
 
-    const newPet = {
+    const id = $(this).data("pet-id");
+    const updatedPet = {
       name: $("#pet-name").val(),
       tag: $("#pet-tag").val(),
       pet_type_id: $("#pet-type").val(),
       pet_state_id: $("#pet-state").val(),
-      created_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabase.from("pets").insert([newPet]);
+    let response;
+    if (id) {
+      // Si hay un ID, actualizar la mascota existente
+      response = await supabase.from("pets").update(updatedPet).eq("id", id);
+    } else {
+      // Si no hay ID, agregar una nueva mascota
+      updatedPet.created_at = new Date().toISOString();
+      response = await supabase.from("pets").insert([updatedPet]);
+    }
+
+    const { error } = response;
 
     if (error) {
       console.error("Error inserting data: ", error);
