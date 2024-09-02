@@ -94,7 +94,11 @@
             <!-- Tarjeta de tabla -->
             <div id="pets-table-card" class="card" style="display: none">
               <div class="card-body">
-                <table id="pets-table" class="display" style="width: 100%">
+                <table
+                  id="pets-table"
+                  class="display compact"
+                  style="width: 100%"
+                >
                   <thead>
                     <tr>
                       <th>Nombre</th>
@@ -102,6 +106,8 @@
                       <th>Tipo de Mascota</th>
                       <th>Estado de Adopción</th>
                       <th>Fecha de Registro</th>
+                      <th>Acciones</th>
+                      <!-- Columna para acciones -->
                     </tr>
                   </thead>
                   <tbody>
@@ -110,45 +116,127 @@
                 </table>
               </div>
             </div>
-            <!-- Tarjeta de form -->
-            <div id="pets-form-card" class="card" style="display: none">
-              <div class="card-body">
-                <form id="new-pet-form">
-                  <h3>Agregar Nueva Mascota</h3>
-                  <label for="pet-name">Nombre de la Mascota:</label><br />
-                  <input
-                    type="text"
-                    id="pet-name"
-                    name="name"
-                    required
-                  /><br /><br />
-
-                  <label for="pet-tag">Etiqueta:</label><br />
-                  <input
-                    type="text"
-                    id="pet-tag"
-                    name="tag"
-                    required
-                  /><br /><br />
-
-                  <label for="pet-type">Tipo de Mascota:</label><br />
-                  <select id="pet-type" name="type" required>
-                    <!-- Opciones que serán llenadas dinámicamente --></select
-                  ><br /><br />
-
-                  <label for="pet-state">Estado de Adopción:</label><br />
-                  <select id="pet-state" name="state" required>
-                    <!-- Opciones que serán llenadas dinámicamente --></select
-                  ><br /><br />
-
-                  <button type="submit">Agregar Mascota</button>
-                </form>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Modal para agregar/editar mascota -->
+    <div
+      class="modal fade"
+      id="pet-modal"
+      tabindex="-1"
+      aria-labelledby="pet-modal-label"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="pet-modal-label">Agregar Mascota</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="new-pet-form">
+              <div class="mb-3">
+                <label for="pet-name" class="form-label"
+                  >Nombre de la Mascota</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="pet-name"
+                  name="name"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="pet-tag" class="form-label">Etiqueta</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="pet-tag"
+                  name="tag"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="pet-type" class="form-label">Tipo de Mascota</label>
+                <select class="form-select" id="pet-type" name="type" required>
+                  <!-- Opciones que serán llenadas dinámicamente -->
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="pet-state" class="form-label"
+                  >Estado de Adopción</label
+                >
+                <select
+                  class="form-select"
+                  id="pet-state"
+                  name="state"
+                  required
+                >
+                  <!-- Opciones que serán llenadas dinámicamente -->
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Guardar Mascota
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div
+      class="modal fade"
+      id="confirm-delete-modal"
+      tabindex="-1"
+      aria-labelledby="confirm-delete-modal-label"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirm-delete-modal-label">
+              Confirmar Eliminación
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            ¿Estás seguro de que deseas eliminar esta mascota? Esta acción no se
+            puede deshacer.
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="confirm-delete-btn"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
