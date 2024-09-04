@@ -1,8 +1,5 @@
 // Crear el cliente de Supabase utilizando la versión 2 del SDK
-const supabaseUrl = "https://wrmppqblaxqynkufwtkt.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndybXBwcWJsYXhxeW5rdWZ3dGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjMxNTQzNTIsImV4cCI6MjAzODczMDM1Mn0.KDGMFdcsCFg0Babt2F1mhDaVSQruiRQUGsif0Z2Q6Uw";
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+import supabase from "./libs/supabase.js";
 
 $(document).ready(async function () {
   // Capturar el evento submit del formulario
