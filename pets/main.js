@@ -9,35 +9,17 @@ $(document).ready(async function () {
   $("#loading-spinner").show();
 
   // Fetch data
-  const [petTypesResponse, petStatesResponse, petsDataResponse] =
-    await Promise.all([
-      supabase.from("pet_types").select("*"),
-      supabase.from("pet_states").select("*"),
-      supabase.from("pets").select(`
-        id,
-        created_at,
-        name,
-        tag,
-        pet_type_id,
-        pet_state_id,
-        pet_types (name),
-        pet_states (name)
-      `),
-    ]);
+  const [petTypesResponse, petStatesResponse] = await Promise.all([
+    supabase.from("pet_types").select("*"),
+    supabase.from("pet_states").select("*"),
+  ]);
   const petTypes = petTypesResponse.data;
   const petStates = petStatesResponse.data;
-  const petsData = petsDataResponse.data;
 
-  if (
-    petTypesResponse.error ||
-    petStatesResponse.error ||
-    petsDataResponse.error
-  ) {
+  if (petTypesResponse.error || petStatesResponse.error) {
     console.error(
       "Error fetching data: ",
-      petTypesResponse.error ||
-        petStatesResponse.error ||
-        petsDataResponse.error
+      petTypesResponse.error || petStatesResponse.error
     );
     return;
   }
@@ -54,10 +36,52 @@ $(document).ready(async function () {
 
   // Initialize DataTable
   const table = $("#pets-table").DataTable({
-    language: {
-      url: "../assets/jsons/es-AR.json",
+    serverSide: true,
+    processing: true,
+    ajax: async function (data, callback) {
+      const limit = data.length;
+      const offset = data.start;
+      const searchValue = data.search.value;
+      const orderColumn = data.order[0].column;
+      const orderDirection = data.order[0].dir;
+      const columns = [
+        "name",
+        "tag",
+        "pet_types.name",
+        "pet_states.name",
+        "created_at",
+      ];
+      const columnToOrder = columns[orderColumn];
+      let query = supabase
+        .from("pets")
+        .select(
+          `
+          id,
+          created_at,
+          name,
+          tag,
+          pet_types (name),
+          pet_states (name)
+        `,
+          { count: "exact" }
+        )
+        .range(offset, offset + limit - 1)
+        .order(columnToOrder, { ascending: orderDirection === "asc" });
+      if (searchValue) {
+        query = query.ilike("name", `%${searchValue}%`);
+      }
+      const { data: petsData, count, error } = await query;
+      if (error) {
+        console.error("Error fetching pets: ", error);
+        return;
+      }
+      callback({
+        draw: data.draw,
+        recordsTotal: count,
+        recordsFiltered: count,
+        data: petsData,
+      });
     },
-    data: petsData,
     columns: [
       {
         title: "Nombre",
@@ -66,6 +90,8 @@ $(document).ready(async function () {
       {
         title: "Etiqueta",
         data: "tag",
+        width: "1%",
+        className: "text-nowrap",
         render: (data, type, row, meta) => {
           return `<span class="badge bg-primary">${data}</span>`;
         },
@@ -75,6 +101,8 @@ $(document).ready(async function () {
       {
         title: "Fecha de Registro",
         data: "created_at",
+        width: "1%",
+        className: "text-nowrap",
         render: (data, type, row, meta) => {
           const date = new Date(data);
           return date
@@ -89,6 +117,8 @@ $(document).ready(async function () {
       {
         title: "Acciones",
         width: "1%",
+        className: "text-nowrap",
+        orderable: false,
         render: (data, type, row, meta) => {
           return `
               <button
@@ -147,6 +177,9 @@ $(document).ready(async function () {
     paging: true,
     searching: true,
     ordering: true,
+    language: {
+      url: "../assets/jsons/es-AR.json",
+    },
     layout: {
       topStart: function () {
         let toolbar = document.createElement("div");
@@ -164,8 +197,8 @@ $(document).ready(async function () {
   // Add pet button
   $("#add-pet-btn").on("click", function () {
     $("#pet-modal-label").text("Agregar Mascota");
-    $("#new-pet-form").trigger("reset"); // Limpiar el formulario
-    $("#new-pet-form").removeData("pet-id"); // Quitar el ID del formulario
+    $("#new-pet-form").trigger("reset");
+    $("#new-pet-form").removeData("pet-id");
   });
 
   // Edit pet button
@@ -179,7 +212,7 @@ $(document).ready(async function () {
       $("#pet-tag").val(selectedData.tag);
       $("#pet-type").val(selectedData.pet_type_id);
       $("#pet-state").val(selectedData.pet_state_id);
-      $("#new-pet-form").data("pet-id", id); // Guardar el ID en el formulario para actualizar
+      $("#new-pet-form").data("pet-id", id);
     }
   });
 
@@ -197,11 +230,11 @@ $(document).ready(async function () {
         .eq("id", petIdToDelete);
 
       if (error) {
-        console.error("Error deleting pet: ", error);
-        alert("Error al eliminar la mascota: " + error.message);
+        console.error("Error: ", error);
+        // alert("Error al eliminar la mascota: " + error.message);
       } else {
-        alert("Mascota eliminada exitosamente.");
-        location.reload();
+        // alert("Mascota eliminada exitosamente.");
+        table.ajax.reload();
       }
     }
   });
@@ -226,11 +259,11 @@ $(document).ready(async function () {
 
     const { error } = response;
     if (error) {
-      console.error("Error inserting data: ", error);
-      alert("Error al agregar la mascota: " + error.message);
+      console.error("Error: ", error);
+      // alert("Error al agregar la mascota: " + error.message);
     } else {
-      alert("Mascota agregada exitosamente.");
-      location.reload();
+      // alert("Mascota agregada exitosamente.");
+      table.ajax.reload();
     }
   });
 });
