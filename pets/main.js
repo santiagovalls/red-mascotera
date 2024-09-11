@@ -1,30 +1,52 @@
 import { checkUserToken, supabase } from "../libs/supabase.js";
+import { showErrorToast, showSuccessToast } from "../libs/toastr.js";
 
 $(document).ready(async function () {
+  await initializePage();
+});
+
+async function initializePage() {
   await checkUserToken();
+  showLoadingState();
 
-  // Show spinner
-  $("#pets-table-card").hide();
-  $("#pets-form-card").hide();
+  const [petTypes, petStates] = await fetchPetTypesAndStates();
+  if (!petTypes || !petStates) return;
+
+  populateSelectOptions(petTypes, petStates);
+  const table = initializeDataTable();
+
+  hideLoadingState();
+  setupEventListeners(table);
+}
+
+function showLoadingState() {
+  $("#pets-table-card, #pets-form-card").hide();
   $("#loading-spinner").show();
+}
 
-  // Fetch data
+function hideLoadingState() {
+  $("#loading-spinner").hide();
+  $("#pets-table-card, #pets-form-card").show();
+}
+
+async function fetchPetTypesAndStates() {
   const [petTypesResponse, petStatesResponse] = await Promise.all([
     supabase.from("pet_types").select("*"),
     supabase.from("pet_states").select("*"),
   ]);
-  const petTypes = petTypesResponse.data;
-  const petStates = petStatesResponse.data;
 
   if (petTypesResponse.error || petStatesResponse.error) {
-    console.error(
-      "Error fetching data: ",
-      petTypesResponse.error || petStatesResponse.error
+    showErrorToast(
+      "Error fetching data: " +
+        (petTypesResponse.error || petStatesResponse.error).message
     );
-    return;
+    return [null, null];
   }
 
-  // Fill selects options
+  return [petTypesResponse.data, petStatesResponse.data];
+}
+
+function populateSelectOptions(petTypes, petStates) {
   petTypes.forEach((type) => {
     $("#pet-type").append(`<option value="${type.id}">${type.name}</option>`);
   });
@@ -33,9 +55,10 @@ $(document).ready(async function () {
       `<option value="${state.id}">${state.name}</option>`
     );
   });
+}
 
-  // Initialize DataTable
-  const table = $("#pets-table").DataTable({
+function initializeDataTable() {
+  return $("#pets-table").DataTable({
     serverSide: true,
     processing: true,
     ajax: async function (data, callback) {
@@ -72,7 +95,7 @@ $(document).ready(async function () {
       }
       const { data: petsData, count, error } = await query;
       if (error) {
-        console.error("Error fetching pets: ", error);
+        showErrorToast("Error fetching pets: " + error.message);
         return;
       }
       callback({
@@ -188,82 +211,90 @@ $(document).ready(async function () {
       },
     },
   });
+}
 
-  // Hide spinner
-  $("#loading-spinner").hide();
-  $("#pets-table-card").show();
-  $("#pets-form-card").show();
+function setupEventListeners(table) {
+  $("#add-pet-btn").on("click", handleAddPetClick);
+  $("#pets-table tbody").on("click", ".edit-btn", handleEditPetClick);
+  $("#pets-table tbody").on("click", ".delete-btn", handleDeletePetClick);
+  $("#confirm-delete-btn").on("click", () => handleConfirmDelete(table));
+  $("#new-pet-form").on("submit", (event) => handleFormSubmit(event, table));
+}
 
-  // Add pet button
-  $("#add-pet-btn").on("click", function () {
-    $("#pet-modal-label").text("Agregar Mascota");
-    $("#new-pet-form").trigger("reset");
-    $("#new-pet-form").removeData("pet-id");
-  });
+function handleAddPetClick() {
+  $("#pet-modal-label").text("Agregar Mascota");
+  $("#new-pet-form").trigger("reset").removeData("pet-id");
+}
 
-  // Edit pet button
-  $("#pets-table tbody").on("click", ".edit-btn", function () {
-    const id = $(this).data("id");
-    const selectedData = petsData.find((pet) => pet.id === id);
+function handleEditPetClick() {
+  const id = $(this).data("id");
+  const selectedData = table.row($(this).closest("tr")).data();
 
-    if (selectedData) {
-      $("#pet-modal-label").text("Editar Mascota");
-      $("#pet-name").val(selectedData.name);
-      $("#pet-tag").val(selectedData.tag);
-      $("#pet-type").val(selectedData.pet_type_id);
-      $("#pet-state").val(selectedData.pet_state_id);
-      $("#new-pet-form").data("pet-id", id);
-    }
-  });
+  if (selectedData) {
+    $("#pet-modal-label").text("Editar Mascota");
+    $("#pet-name").val(selectedData.name);
+    $("#pet-tag").val(selectedData.tag);
+    $("#pet-type").val(selectedData.pet_types.id);
+    $("#pet-state").val(selectedData.pet_states.id);
+    $("#new-pet-form").data("pet-id", id);
+  }
+}
 
-  // Delete pet button
-  let petIdToDelete = null;
-  $("#pets-table tbody").on("click", ".delete-btn", function () {
-    petIdToDelete = $(this).data("id");
-  });
-  // Confirm delete
-  $("#confirm-delete-btn").on("click", async function () {
-    if (petIdToDelete) {
-      const { error } = await supabase
-        .from("pets")
-        .delete()
-        .eq("id", petIdToDelete);
+function handleDeletePetClick() {
+  const petIdToDelete = $(this).data("id");
+  $("#confirm-delete-btn").data("pet-id", petIdToDelete);
+}
 
-      if (error) {
-        console.error("Error: ", error);
-        // alert("Error al eliminar la mascota: " + error.message);
-      } else {
-        // alert("Mascota eliminada exitosamente.");
-        table.ajax.reload();
-      }
-    }
-  });
+async function handleConfirmDelete(table) {
+  const petIdToDelete = $("#confirm-delete-btn").data("pet-id");
+  if (petIdToDelete) {
+    const { error } = await supabase
+      .from("pets")
+      .delete()
+      .eq("id", petIdToDelete);
 
-  // Submit form
-  $("#new-pet-form").on("submit", async function (event) {
-    event.preventDefault();
-    const id = $(this).data("pet-id");
-    const updatedPet = {
-      name: $("#pet-name").val(),
-      tag: $("#pet-tag").val(),
-      pet_type_id: $("#pet-type").val(),
-      pet_state_id: $("#pet-state").val(),
-    };
-
-    let response;
-    if (id) {
-      response = await supabase.from("pets").update(updatedPet).eq("id", id);
-    } else {
-      response = await supabase.from("pets").insert([updatedPet]);
-    }
-
-    const { error } = response;
     if (error) {
-      console.error("Error: ", error);
-      // alert("Error al agregar la mascota: " + error.message);
+      showErrorToast("Error al eliminar la mascota: " + error.message);
     } else {
-      // alert("Mascota agregada exitosamente.");
+      showSuccessToast("Mascota eliminada exitosamente.");
       table.ajax.reload();
     }
-  });
-});
+  }
+}
+
+async function handleFormSubmit(event, table) {
+  event.preventDefault();
+  const id = $(this).data("pet-id");
+  const updatedPet = {
+    name: $("#pet-name").val(),
+    tag: $("#pet-tag").val(),
+    pet_type_id: $("#pet-type").val(),
+    pet_state_id: $("#pet-state").val(),
+  };
+
+  let response;
+  if (id) {
+    response = await supabase.from("pets").update(updatedPet).eq("id", id);
+  } else {
+    response = await supabase.from("pets").insert([updatedPet]);
+  }
+
+  const { error } = response;
+  if (error) {
+    showErrorToast(
+      "Error al " +
+        (id ? "actualizar" : "agregar") +
+        " la mascota: " +
+        error.message
+    );
+  } else {
+    showSuccessToast(
+      "Mascota " + (id ? "actualizada" : "agregada") + " exitosamente."
+    );
+    const closeButton = document.getElementById("close-pet-modal");
+    if (closeButton) {
+      closeButton.click();
+    }
+    table.ajax.reload();
+  }
+}

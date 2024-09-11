@@ -16,11 +16,12 @@ export const toastrOptions = {
   hideMethod: "fadeOut",
 };
 
-export function showErrorToast(errorMessage) {
-  toastr.error(
-    errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1),
-    "Error"
-  );
+export function showErrorToast(message) {
+  toastr.error(message.charAt(0).toUpperCase() + message.slice(1), "Error");
+}
+
+export function showSuccessToast(message) {
+  toastr.success(message.charAt(0).toUpperCase() + message.slice(1), "Success");
 }
 
 export function initializeToastr() {

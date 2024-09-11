@@ -11,7 +11,7 @@
   "infoThousands": ".",
   "lengthMenu": "Mostrar _MENU_ entradas",
   "loadingRecords": "Cargando...",
-  "processing": "Procesando...",
+  "processing": "<span><div class=\"spinner-border\" role=\"status\"></div></span>",
   "search": "Busqueda:",
   "searchBuilder": {
     "add": "Agregar condición",

@@ -1,3 +1,16 @@
 .dt-paging-button {
   border-radius: 4px !important;
 }
+
+.dt-processing {
+  background-color: white;
+  border: 1px solid #ddd;
+  width: auto !important;
+  margin-left: 0px !important;
+  margin-top: 0px !important;
+  padding: 10px !important;
+}
+
+.dt-processing > div {
+  display: none;
+}
