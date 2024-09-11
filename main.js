@@ -1,5 +1,30 @@
 // Crear el cliente de Supabase utilizando la versión 2 del SDK
-import supabase from "./libs/supabase.js";
+import { supabase } from "./libs/supabase.js";
+
+toastr.options = {
+  closeButton: true,
+  debug: false,
+  newestOnTop: false,
+  progressBar: true,
+  positionClass: "toast-bottom-right",
+  preventDuplicates: true,
+  onclick: null,
+  showDuration: "300",
+  hideDuration: "1000",
+  timeOut: "5000",
+  extendedTimeOut: "1000",
+  showEasing: "swing",
+  hideEasing: "linear",
+  showMethod: "fadeIn",
+  hideMethod: "fadeOut",
+};
+
+function showErrorToast(errorMessage) {
+  toastr.error(
+    errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1),
+    "Error"
+  );
+}
 
 $(document).ready(async function () {
   // Capturar el evento submit del formulario
@@ -20,8 +45,7 @@ $(document).ready(async function () {
     });
 
     if (error) {
-      console.error("Error during login:", error.message);
-      alert("Error al iniciar sesión: " + error.message);
+      showErrorToast(error.message);
       $("#loading-spinner").hide();
       $("#login-form-card").show();
       return;
