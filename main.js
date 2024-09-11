@@ -1,57 +1,55 @@
-// Crear el cliente de Supabase utilizando la versión 2 del SDK
 import { supabase } from "./libs/supabase.js";
+import { showErrorToast } from "./libs/toastr.js";
 
-toastr.options = {
-  closeButton: true,
-  debug: false,
-  newestOnTop: false,
-  progressBar: true,
-  positionClass: "toast-bottom-right",
-  preventDuplicates: true,
-  onclick: null,
-  showDuration: "300",
-  hideDuration: "1000",
-  timeOut: "5000",
-  extendedTimeOut: "1000",
-  showEasing: "swing",
-  hideEasing: "linear",
-  showMethod: "fadeIn",
-  hideMethod: "fadeOut",
-};
+$(document).ready(function () {
+  setupLoginFormSubmission();
+});
 
-function showErrorToast(errorMessage) {
-  toastr.error(
-    errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1),
-    "Error"
-  );
+function setupLoginFormSubmission() {
+  $("#login-form").on("submit", handleLoginFormSubmit);
 }
 
-$(document).ready(async function () {
-  // Capturar el evento submit del formulario
-  $("#login-form").on("submit", async function (event) {
-    event.preventDefault();
+async function handleLoginFormSubmit(event) {
+  event.preventDefault();
+  showLoadingState();
 
-    // Mostrar spinner y deshabilitar el formulario
-    $("#loading-spinner").show();
-    $("#login-form-card").hide();
+  const credentials = getLoginCredentials();
+  const loginSuccessful = await attemptLogin(credentials);
 
-    const email = $("#email").val();
-    const password = $("#password").val();
+  if (loginSuccessful) {
+    redirectToPetsPage();
+  } else {
+    hideLoadingState();
+  }
+}
 
-    // Intentar login con Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+function showLoadingState() {
+  $("#loading-spinner").show();
+  $("#login-form-card").hide();
+}
 
-    if (error) {
-      showErrorToast(error.message);
-      $("#loading-spinner").hide();
-      $("#login-form-card").show();
-      return;
-    }
+function hideLoadingState() {
+  $("#loading-spinner").hide();
+  $("#login-form-card").show();
+}
 
-    // Redirigir al usuario a la página de pets
-    window.location.href = "pets/index.html";
-  });
-});
+function getLoginCredentials() {
+  return {
+    email: $("#email").val(),
+    password: $("#password").val(),
+  };
+}
+
+async function attemptLogin({ email, password }) {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    showErrorToast(error.message);
+    return false;
+  }
+  return true;
+}
+
+function redirectToPetsPage() {
+  window.location.href = "pets/index.html";
+}
