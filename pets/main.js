@@ -1,6 +1,8 @@
 import { checkUserToken, supabase } from "../libs/supabase.js";
 import { showErrorToast, showSuccessToast } from "../libs/toastr.js";
 
+let table;
+
 $(document).ready(async function () {
   await initializePage();
 });
@@ -11,22 +13,12 @@ async function initializePage() {
 
   const [petTypes, petStates] = await fetchPetTypesAndStates();
   if (!petTypes || !petStates) return;
-
   populateSelectOptions(petTypes, petStates);
-  const table = initializeDataTable();
+
+  table = initializeDataTable();
+  setupEventListeners();
 
   hideLoadingState();
-  setupEventListeners(table);
-}
-
-function showLoadingState() {
-  $("#pets-table-card, #pets-form-card").hide();
-  $("#loading-spinner").show();
-}
-
-function hideLoadingState() {
-  $("#loading-spinner").hide();
-  $("#pets-table-card, #pets-form-card").show();
 }
 
 async function fetchPetTypesAndStates() {
@@ -64,17 +56,6 @@ function initializeDataTable() {
     ajax: async function (data, callback) {
       const limit = data.length;
       const offset = data.start;
-      const searchValue = data.search.value;
-      const orderColumn = data.order[0].column;
-      const orderDirection = data.order[0].dir;
-      const columns = [
-        "name",
-        "tag",
-        "pet_types.name",
-        "pet_states.name",
-        "created_at",
-      ];
-      const columnToOrder = columns[orderColumn];
       let query = supabase
         .from("pets")
         .select(
@@ -83,13 +64,26 @@ function initializeDataTable() {
           created_at,
           name,
           tag,
-          pet_types (name),
-          pet_states (name)
+          pet_types (id, name),
+          pet_states (id, name)
         `,
           { count: "exact" }
         )
-        .range(offset, offset + limit - 1)
-        .order(columnToOrder, { ascending: orderDirection === "asc" });
+        .range(offset, offset + limit - 1);
+      if (data.order[0]) {
+        const orderColumn = data.order[0].column;
+        const orderDirection = data.order[0].dir;
+        const columns = [
+          "name",
+          "tag",
+          "pet_types(name)",
+          "pet_states(name)",
+          "created_at",
+        ];
+        const columnToOrder = columns[orderColumn];
+        query.order(columnToOrder, { ascending: orderDirection === "asc" });
+      }
+      const searchValue = data.search.value;
       if (searchValue) {
         query = query.ilike("name", `%${searchValue}%`);
       }
@@ -213,12 +207,12 @@ function initializeDataTable() {
   });
 }
 
-function setupEventListeners(table) {
+function setupEventListeners() {
   $("#add-pet-btn").on("click", handleAddPetClick);
   $("#pets-table tbody").on("click", ".edit-btn", handleEditPetClick);
   $("#pets-table tbody").on("click", ".delete-btn", handleDeletePetClick);
-  $("#confirm-delete-btn").on("click", () => handleConfirmDelete(table));
-  $("#new-pet-form").on("submit", (event) => handleFormSubmit(event, table));
+  $("#confirm-delete-btn").on("click", () => handleConfirmDelete());
+  $("#new-pet-form").on("submit", (event) => handleFormSubmit(event));
 }
 
 function handleAddPetClick() {
@@ -245,7 +239,7 @@ function handleDeletePetClick() {
   $("#confirm-delete-btn").data("pet-id", petIdToDelete);
 }
 
-async function handleConfirmDelete(table) {
+async function handleConfirmDelete() {
   const petIdToDelete = $("#confirm-delete-btn").data("pet-id");
   if (petIdToDelete) {
     const { error } = await supabase
@@ -257,14 +251,25 @@ async function handleConfirmDelete(table) {
       showErrorToast("Error al eliminar la mascota: " + error.message);
     } else {
       showSuccessToast("Mascota eliminada exitosamente.");
-      table.ajax.reload();
+      const closeButton = document.getElementById("close-pet-modal-delete");
+      if (closeButton) {
+        closeButton.click();
+      }
+      const currentPage = table.page();
+      const currentPageRecords = table.rows({ page: "current" }).count();
+      table.ajax.reload(() => {
+        // Si la página actual quedó vacía después de eliminar, retrocedemos una página
+        if (currentPageRecords === 1 && currentPage > 0) {
+          table.page(currentPage - 1).draw(false);
+        }
+      }, false);
     }
   }
 }
 
-async function handleFormSubmit(event, table) {
+async function handleFormSubmit(event) {
   event.preventDefault();
-  const id = $(this).data("pet-id");
+  const id = $("#new-pet-form").data("pet-id");
   const updatedPet = {
     name: $("#pet-name").val(),
     tag: $("#pet-tag").val(),
@@ -295,6 +300,16 @@ async function handleFormSubmit(event, table) {
     if (closeButton) {
       closeButton.click();
     }
-    table.ajax.reload();
+    table.ajax.reload(null, false);
   }
+}
+
+function showLoadingState() {
+  $("#pets-table-card, #pets-form-card").hide();
+  $("#loading-spinner").show();
+}
+
+function hideLoadingState() {
+  $("#loading-spinner").hide();
+  $("#pets-table-card, #pets-form-card").show();
 }

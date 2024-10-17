@@ -23,6 +23,20 @@ async function handleLoginFormSubmit(event) {
   }
 }
 
+async function attemptLogin({ email, password }) {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    showErrorToast(error.message);
+    return false;
+  }
+  return true;
+}
+
+function redirectToPetsPage() {
+  window.location.href = "pets/index.html";
+}
+
 function showLoadingState() {
   $("#loading-spinner").show();
   $("#login-form-card").hide();
@@ -38,18 +52,4 @@ function getLoginCredentials() {
     email: $("#email").val(),
     password: $("#password").val(),
   };
-}
-
-async function attemptLogin({ email, password }) {
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    showErrorToast(error.message);
-    return false;
-  }
-  return true;
-}
-
-function redirectToPetsPage() {
-  window.location.href = "pets/index.html";
 }
