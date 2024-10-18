@@ -40,17 +40,19 @@ async function fetchPetTypesAndStates() {
 
 function populateSelectOptions(petTypes, petStates) {
   petTypes.forEach((type) => {
-    $("#pet-type").append(`<option value="${type.id}">${type.name}</option>`);
+    $("#form-new-entity-field-type").append(
+      `<option value="${type.id}">${type.name}</option>`
+    );
   });
   petStates.forEach((state) => {
-    $("#pet-state").append(
+    $("#form-new-entity-field-state").append(
       `<option value="${state.id}">${state.name}</option>`
     );
   });
 }
 
 function initializeDataTable() {
-  return $("#pets-table").DataTable({
+  const table = $("#table-entity").DataTable({
     serverSide: true,
     processing: true,
     ajax: async function (data, callback) {
@@ -103,6 +105,9 @@ function initializeDataTable() {
       {
         title: "Nombre",
         data: "name",
+        render: (data, type, row, meta) => {
+          return `<span class="searchable">${data}</span>`;
+        },
       },
       {
         title: "Etiqueta",
@@ -142,7 +147,7 @@ function initializeDataTable() {
                 class="btn btn-icon btn-primary edit-btn"
                 data-id="${row.id}"
                 data-bs-toggle="modal"
-                data-bs-target="#pet-modal"
+                data-bs-target="#modal-add-entity"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -200,24 +205,46 @@ function initializeDataTable() {
     layout: {
       topStart: function () {
         let toolbar = document.createElement("div");
-        toolbar.innerHTML = `<button class="btn btn-primary" id="add-pet-btn" data-bs-toggle="modal" data-bs-target="#pet-modal">Agregar Mascota</button>`;
+        toolbar.innerHTML = `<button class="btn btn-primary" id="add-pet-btn" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Agregar Mascota</button>`;
         return toolbar;
       },
     },
   });
+  // Escuchar el evento de búsqueda para resaltar coincidencias
+  table.on("draw.dt search.dt", function () {
+    const searchTerm = table.search().toLowerCase();
+    if (searchTerm) {
+      $("#table-entity tbody")
+        .find("tr")
+        .each(function () {
+          $(this)
+            .find("span.searchable")
+            .each(function () {
+              const originalText = $(this).text();
+              const regex = new RegExp(`(${searchTerm})`, "gi");
+              const highlightedText = originalText.replace(
+                regex,
+                `<span class="searchable highlight">$1</span>`
+              );
+              $(this).html(highlightedText);
+            });
+        });
+    }
+  });
+  return table;
 }
 
 function setupEventListeners() {
   $("#add-pet-btn").on("click", handleAddPetClick);
-  $("#pets-table tbody").on("click", ".edit-btn", handleEditPetClick);
-  $("#pets-table tbody").on("click", ".delete-btn", handleDeletePetClick);
+  $("#table-entity tbody").on("click", ".edit-btn", handleEditPetClick);
+  $("#table-entity tbody").on("click", ".delete-btn", handleDeletePetClick);
   $("#confirm-delete-btn").on("click", () => handleConfirmDelete());
-  $("#new-pet-form").on("submit", (event) => handleFormSubmit(event));
+  $("#form-new-entity").on("submit", (event) => handleFormSubmit(event));
 }
 
 function handleAddPetClick() {
-  $("#pet-modal-label").text("Agregar Mascota");
-  $("#new-pet-form").trigger("reset").removeData("pet-id");
+  $("#modal-add-entity-label").text("Agregar Mascota");
+  $("#form-new-entity").trigger("reset").removeData("pet-id");
 }
 
 function handleEditPetClick() {
@@ -225,12 +252,12 @@ function handleEditPetClick() {
   const selectedData = table.row($(this).closest("tr")).data();
 
   if (selectedData) {
-    $("#pet-modal-label").text("Editar Mascota");
-    $("#pet-name").val(selectedData.name);
-    $("#pet-tag").val(selectedData.tag);
-    $("#pet-type").val(selectedData.pet_types.id);
-    $("#pet-state").val(selectedData.pet_states.id);
-    $("#new-pet-form").data("pet-id", id);
+    $("#modal-add-entity-label").text("Editar Mascota");
+    $("#form-new-entity-field-name").val(selectedData.name);
+    $("#form-new-entity-field-tag").val(selectedData.tag);
+    $("#form-new-entity-field-type").val(selectedData.pet_types.id);
+    $("#form-new-entity-field-state").val(selectedData.pet_states.id);
+    $("#form-new-entity").data("pet-id", id);
   }
 }
 
@@ -269,12 +296,12 @@ async function handleConfirmDelete() {
 
 async function handleFormSubmit(event) {
   event.preventDefault();
-  const id = $("#new-pet-form").data("pet-id");
+  const id = $("#form-new-entity").data("pet-id");
   const updatedPet = {
-    name: $("#pet-name").val(),
-    tag: $("#pet-tag").val(),
-    pet_type_id: $("#pet-type").val(),
-    pet_state_id: $("#pet-state").val(),
+    name: $("#form-new-entity-field-name").val(),
+    tag: $("#form-new-entity-field-tag").val(),
+    pet_type_id: $("#form-new-entity-field-type").val(),
+    pet_state_id: $("#form-new-entity-field-state").val(),
   };
 
   let response;
@@ -296,7 +323,9 @@ async function handleFormSubmit(event) {
     showSuccessToast(
       "Mascota " + (id ? "actualizada" : "agregada") + " exitosamente."
     );
-    const closeButton = document.getElementById("close-pet-modal");
+    const closeButton = document.getElementById(
+      "modal-add-entity-button-close"
+    );
     if (closeButton) {
       closeButton.click();
     }
@@ -305,11 +334,11 @@ async function handleFormSubmit(event) {
 }
 
 function showLoadingState() {
-  $("#pets-table-card, #pets-form-card").hide();
+  $("#card-table-entity, #pets-form-card").hide();
   $("#loading-spinner").show();
 }
 
 function hideLoadingState() {
   $("#loading-spinner").hide();
-  $("#pets-table-card, #pets-form-card").show();
+  $("#card-table-entity, #pets-form-card").show();
 }

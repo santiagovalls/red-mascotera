@@ -57,7 +57,7 @@
               />
             </svg>
 
-            <a class="ps-2" href="#">Red Mascotera</a>
+            <span class="ps-2" href="#">Red Mascotera</span>
           </h1>
           <div class="navbar-nav flex-row order-md-last">
             <div class="nav-item">
@@ -79,7 +79,7 @@
                   <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
                 </svg>
                 <div class="d-none d-xl-block ps-2">
-                  <div id="user-email">-</div>
+                  <div id="navbar-user-email">-</div>
                   <div class="mt-1 small text-secondary">Administrador</div>
                 </div>
               </a>
@@ -96,10 +96,10 @@
               <div class="spinner-border" role="status"></div>
             </div>
             <!-- Tarjeta de tabla -->
-            <div id="pets-table-card" class="card" style="display: none">
+            <div id="card-table-entity" class="card" style="display: none">
               <div class="card-body">
                 <table
-                  id="pets-table"
+                  id="table-entity"
                   class="display compact"
                   style="width: 100%"
                 >
@@ -118,60 +118,71 @@
     <!-- Modal para agregar/editar mascota -->
     <div
       class="modal fade"
-      id="pet-modal"
+      id="modal-add-entity"
       tabindex="-1"
-      aria-labelledby="pet-modal-label"
+      aria-labelledby="modal-add-entity-label"
       aria-hidden="true"
     >
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="pet-modal-label">Agregar Mascota</h5>
+            <h5 class="modal-title" id="modal-add-entity-label">
+              Agregar Mascota
+            </h5>
             <button
               type="button"
               class="btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"
-              id="close-pet-modal"
+              id="modal-add-entity-button-close"
             ></button>
           </div>
           <div class="modal-body">
-            <form id="new-pet-form">
+            <form id="form-new-entity">
               <div class="mb-3">
-                <label for="pet-name" class="form-label"
+                <label for="form-new-entity-field-name" class="form-label"
                   >Nombre de la Mascota</label
                 >
                 <input
                   type="text"
                   class="form-control"
-                  id="pet-name"
+                  id="form-new-entity-field-name"
                   name="name"
                   required
                 />
               </div>
               <div class="mb-3">
-                <label for="pet-tag" class="form-label">Etiqueta</label>
+                <label for="form-new-entity-field-tag" class="form-label"
+                  >Etiqueta</label
+                >
                 <input
                   type="text"
                   class="form-control"
-                  id="pet-tag"
+                  id="form-new-entity-field-tag"
                   name="tag"
                   required
                 />
               </div>
               <div class="mb-3">
-                <label for="pet-type" class="form-label">Tipo de Mascota</label>
-                <select class="form-select" id="pet-type" name="type" required>
+                <label for="form-new-entity-field-type" class="form-label"
+                  >Tipo de Mascota</label
+                >
+                <select
+                  class="form-select"
+                  id="form-new-entity-field-type"
+                  name="type"
+                  required
+                >
                   <!-- Opciones que serán llenadas dinámicamente -->
                 </select>
               </div>
               <div class="mb-3">
-                <label for="pet-state" class="form-label"
+                <label for="form-new-entity-field-state" class="form-label"
                   >Estado de Adopción</label
                 >
                 <select
                   class="form-select"
-                  id="pet-state"
+                  id="form-new-entity-field-state"
                   name="state"
                   required
                 >

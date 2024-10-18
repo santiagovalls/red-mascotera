@@ -6,7 +6,7 @@ $(document).ready(function () {
 });
 
 function setupLoginFormSubmission() {
-  $("#login-form").on("submit", handleLoginFormSubmit);
+  $("#form-login").on("submit", handleLoginFormSubmit);
 }
 
 async function handleLoginFormSubmit(event) {
@@ -39,17 +39,17 @@ function redirectToPetsPage() {
 
 function showLoadingState() {
   $("#loading-spinner").show();
-  $("#login-form-card").hide();
+  $("#card-form-login").hide();
 }
 
 function hideLoadingState() {
   $("#loading-spinner").hide();
-  $("#login-form-card").show();
+  $("#card-form-login").show();
 }
 
 function getLoginCredentials() {
   return {
-    email: $("#email").val(),
-    password: $("#password").val(),
+    email: $("#form-login-field-email").val(),
+    password: $("#form-login-field-password").val(),
   };
 }

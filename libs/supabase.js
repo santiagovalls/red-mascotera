@@ -15,9 +15,9 @@ async function checkUserToken() {
   }
   // Actualizar el nombre de usuario o mostrar "-"
   if (userError || !userData.user) {
-    $("#user-email").text("-");
+    $("#navbar-user-email").text("-");
   } else {
-    $("#user-email").text(userData.user.email);
+    $("#navbar-user-email").text(userData.user.email);
   }
 }
 

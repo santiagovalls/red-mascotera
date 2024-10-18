@@ -14,3 +14,7 @@
 .dt-processing > div {
   display: none;
 }
+
+.highlight {
+  background-color: yellow;
+}
