@@ -144,7 +144,8 @@ function initializeDataTable() {
         render: (data, type, row, meta) => {
           return `
               <button
-                class="btn btn-icon btn-primary edit-btn"
+                id="button-edit-entity"
+                class="btn btn-icon btn-primary"
                 data-id="${row.id}"
                 data-bs-toggle="modal"
                 data-bs-target="#modal-add-entity"
@@ -167,10 +168,11 @@ function initializeDataTable() {
                 </svg>
               </button>
               <button
-                class="btn btn-danger btn-icon delete-btn"
+                id="button-delete-entity"
+                class="btn btn-danger btn-icon"
                 data-id="${row.id}"
                 data-bs-toggle="modal"
-                data-bs-target="#confirm-delete-modal"
+                data-bs-target="#modal-delete-entity"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -205,7 +207,7 @@ function initializeDataTable() {
     layout: {
       topStart: function () {
         let toolbar = document.createElement("div");
-        toolbar.innerHTML = `<button class="btn btn-primary" id="add-pet-btn" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Agregar Mascota</button>`;
+        toolbar.innerHTML = `<button class="btn btn-primary" id="button-add-entity" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Agregar Mascota</button>`;
         return toolbar;
       },
     },
@@ -235,10 +237,12 @@ function initializeDataTable() {
 }
 
 function setupEventListeners() {
-  $("#add-pet-btn").on("click", handleAddPetClick);
-  $("#table-entity tbody").on("click", ".edit-btn", handleEditPetClick);
-  $("#table-entity tbody").on("click", ".delete-btn", handleDeletePetClick);
-  $("#confirm-delete-btn").on("click", () => handleConfirmDelete());
+  $(document).on("click", "#button-add-entity", handleAddPetClick);
+  $(document).on("click", "#button-edit-entity", handleEditPetClick);
+  $(document).on("click", "#button-delete-entity", handleDeletePetClick);
+  $("#modal-delete-entity-button-confirm").on("click", () =>
+    handleConfirmDelete()
+  );
   $("#form-new-entity").on("submit", (event) => handleFormSubmit(event));
 }
 
@@ -263,11 +267,11 @@ function handleEditPetClick() {
 
 function handleDeletePetClick() {
   const petIdToDelete = $(this).data("id");
-  $("#confirm-delete-btn").data("pet-id", petIdToDelete);
+  $("#modal-delete-entity-button-confirm").data("pet-id", petIdToDelete);
 }
 
 async function handleConfirmDelete() {
-  const petIdToDelete = $("#confirm-delete-btn").data("pet-id");
+  const petIdToDelete = $("#modal-delete-entity-button-confirm").data("pet-id");
   if (petIdToDelete) {
     const { error } = await supabase
       .from("pets")
@@ -278,7 +282,9 @@ async function handleConfirmDelete() {
       showErrorToast("Error al eliminar la mascota: " + error.message);
     } else {
       showSuccessToast("Mascota eliminada exitosamente.");
-      const closeButton = document.getElementById("close-pet-modal-delete");
+      const closeButton = document.getElementById(
+        "modal-delete-entity-button-close"
+      );
       if (closeButton) {
         closeButton.click();
       }
