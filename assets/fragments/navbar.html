@@ -1,0 +1,45 @@
+<header class="navbar navbar-expand-sm navbar-light d-print-none">
+  <div class="container-xl">
+    <h1
+      class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3"
+    >
+      <img
+        src="/assets/images/icon-dog.svg"
+        alt="Dog Icon"
+        width="24"
+        height="24"
+      />
+      <span class="ps-2" href="#">Red Mascotera</span>
+    </h1>
+    <div
+      id="navbar-user-section"
+      class="navbar-nav flex-row order-md-last"
+      style="display: none"
+    >
+      <div class="nav-item">
+        <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+          <img
+            src="/assets/images/icon-user.svg"
+            alt="User Icon"
+            width="24"
+            height="24"
+          />
+          <div class="d-none d-xl-block ps-2">
+            <div id="navbar-user-email">-</div>
+            <div class="mt-1 small text-secondary">Administrador</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+<script type="module">
+  import { checkUserToken } from "../../libs/supabase.js";
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const userExists = await checkUserToken();
+    if (userExists) {
+      document.getElementById("navbar-user-section").style.display = "flex";
+    }
+  });
+</script>

@@ -8,16 +8,15 @@ async function checkUserToken() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData.user) {
-    alert(
-      "Sesión expirada o no autenticada. Por favor, inicia sesión nuevamente."
-    );
     window.location.href = "/index.html";
   }
   // Actualizar el nombre de usuario o mostrar "-"
   if (userError || !userData.user) {
     $("#navbar-user-email").text("-");
+    return false;
   } else {
     $("#navbar-user-email").text(userData.user.email);
+    return true;
   }
 }
 
