@@ -151,7 +151,7 @@ function initializeDataTable() {
                 data-bs-target="#modal-add-entity"
               >
                 <img
-                  src="/assets/images/icon-pencil.svg"
+                  src="../assets/images/icon-pencil.svg"
                   alt="Pencil Icon"
                   width="22"
                   height="22"
@@ -165,7 +165,7 @@ function initializeDataTable() {
                 data-bs-target="#modal-delete-entity"
               >
                 <img
-                  src="/assets/images/icon-trash.svg"
+                  src="../assets/images/icon-trash.svg"
                   alt="Trash Icon"
                   width="22"
                   height="22"
