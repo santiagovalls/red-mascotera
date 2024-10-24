@@ -178,6 +178,7 @@ function initializeDataTable() {
     paging: true,
     searching: true,
     ordering: true,
+    order: [[1, "asc"]],
     language: {
       url: "../assets/jsons/es-AR.json",
     },
