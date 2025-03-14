@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Red Mascotera</title>
+    <title>Red Mascotera - Pet States</title>
     <!-- CSS -->
     <link
       rel="stylesheet"
@@ -38,7 +38,7 @@
           </h1>
           <div class="navbar-nav flex-row">
             <div class="nav-item">
-              <a href="../pets/index.html" class="nav-link px-3 active">Pets</a>
+              <a href="../pets/index.html" class="nav-link px-3">Pets</a>
             </div>
             <div class="nav-item">
               <a href="../pet_types/index.html" class="nav-link px-3"
@@ -46,7 +46,7 @@
               >
             </div>
             <div class="nav-item">
-              <a href="../pet_states/index.html" class="nav-link px-3"
+              <a href="../pet_states/index.html" class="nav-link px-3 active"
                 >Pet States</a
               >
             </div>
@@ -65,7 +65,7 @@
                 />
                 <div class="d-none d-xl-block ps-2">
                   <div id="navbar-user-email">-</div>
-                  <div class="mt-1 small text-secondary">Administrador</div>
+                  <div class="mt-1 small text-secondary">Administrator</div>
                 </div>
               </a>
             </div>
@@ -100,7 +100,7 @@
       </div>
     </div>
 
-    <!-- Modal para agregar/editar mascota -->
+    <!-- Modal para agregar/editar estado de mascota -->
     <div
       class="modal fade"
       id="modal-add-entity"
@@ -112,7 +112,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modal-add-entity-label">
-              Agregar Mascota
+              Add Pet State
             </h5>
             <button
               type="button"
@@ -126,7 +126,7 @@
             <form id="form-new-entity">
               <div class="mb-3">
                 <label for="form-new-entity-field-name" class="form-label"
-                  >Nombre de la Mascota</label
+                  >Pet State Name</label
                 >
                 <input
                   type="text"
@@ -136,46 +136,8 @@
                   required
                 />
               </div>
-              <div class="mb-3">
-                <label for="form-new-entity-field-tag" class="form-label"
-                  >Etiqueta</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="form-new-entity-field-tag"
-                  name="tag"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="form-new-entity-field-type" class="form-label"
-                  >Tipo de Mascota</label
-                >
-                <select
-                  class="form-select"
-                  id="form-new-entity-field-type"
-                  name="type"
-                  required
-                >
-                  <!-- Opciones que serán llenadas dinámicamente -->
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="form-new-entity-field-state" class="form-label"
-                  >Estado de Adopción</label
-                >
-                <select
-                  class="form-select"
-                  id="form-new-entity-field-state"
-                  name="state"
-                  required
-                >
-                  <!-- Opciones que serán llenadas dinámicamente -->
-                </select>
-              </div>
               <button type="submit" class="btn btn-primary">
-                Guardar Mascota
+                Save Pet State
               </button>
             </form>
           </div>
@@ -195,7 +157,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modal-delete-entity-label">
-              Confirmar Eliminación
+              Confirm Deletion
             </h5>
             <button
               type="button"
@@ -206,8 +168,8 @@
             ></button>
           </div>
           <div class="modal-body">
-            ¿Estás seguro de que deseas eliminar esta mascota? Esta acción no se
-            puede deshacer.
+            Are you sure you want to delete this pet state? This action cannot
+            be undone.
           </div>
           <div class="modal-footer">
             <button
@@ -215,14 +177,14 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="button"
               class="btn btn-danger"
               id="modal-delete-entity-button-confirm"
             >
-              Eliminar
+              Delete
             </button>
           </div>
         </div>

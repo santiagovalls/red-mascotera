@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Red Mascotera</title>
+    <title>Red Mascotera - Dueños</title>
     <!-- CSS -->
     <link
       rel="stylesheet"
@@ -38,7 +38,7 @@
           </h1>
           <div class="navbar-nav flex-row">
             <div class="nav-item">
-              <a href="../pets/index.html" class="nav-link px-3 active">Pets</a>
+              <a href="../pets/index.html" class="nav-link px-3">Pets</a>
             </div>
             <div class="nav-item">
               <a href="../pet_types/index.html" class="nav-link px-3"
@@ -51,7 +51,9 @@
               >
             </div>
             <div class="nav-item">
-              <a href="../owners/index.html" class="nav-link px-3">Dueños</a>
+              <a href="../owners/index.html" class="nav-link px-3 active"
+                >Dueños</a
+              >
             </div>
           </div>
           <div class="navbar-nav flex-row order-md-last">
@@ -65,7 +67,7 @@
                 />
                 <div class="d-none d-xl-block ps-2">
                   <div id="navbar-user-email">-</div>
-                  <div class="mt-1 small text-secondary">Administrador</div>
+                  <div class="mt-1 small text-secondary">Administrator</div>
                 </div>
               </a>
             </div>
@@ -100,7 +102,7 @@
       </div>
     </div>
 
-    <!-- Modal para agregar/editar mascota -->
+    <!-- Modal para agregar/editar propietario -->
     <div
       class="modal fade"
       id="modal-add-entity"
@@ -112,7 +114,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modal-add-entity-label">
-              Agregar Mascota
+              Agregar Dueño
             </h5>
             <button
               type="button"
@@ -125,8 +127,20 @@
           <div class="modal-body">
             <form id="form-new-entity">
               <div class="mb-3">
+                <label for="form-new-entity-field-dni" class="form-label"
+                  >DNI</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="form-new-entity-field-dni"
+                  name="dni"
+                  required
+                />
+              </div>
+              <div class="mb-3">
                 <label for="form-new-entity-field-name" class="form-label"
-                  >Nombre de la Mascota</label
+                  >Nombre</label
                 >
                 <input
                   type="text"
@@ -137,45 +151,20 @@
                 />
               </div>
               <div class="mb-3">
-                <label for="form-new-entity-field-tag" class="form-label"
-                  >Etiqueta</label
+                <label
+                  for="form-new-entity-field-contact-data"
+                  class="form-label"
+                  >Datos de Contacto</label
                 >
-                <input
-                  type="text"
+                <textarea
                   class="form-control"
-                  id="form-new-entity-field-tag"
-                  name="tag"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="form-new-entity-field-type" class="form-label"
-                  >Tipo de Mascota</label
-                >
-                <select
-                  class="form-select"
-                  id="form-new-entity-field-type"
-                  name="type"
-                  required
-                >
-                  <!-- Opciones que serán llenadas dinámicamente -->
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="form-new-entity-field-state" class="form-label"
-                  >Estado de Adopción</label
-                >
-                <select
-                  class="form-select"
-                  id="form-new-entity-field-state"
-                  name="state"
-                  required
-                >
-                  <!-- Opciones que serán llenadas dinámicamente -->
-                </select>
+                  id="form-new-entity-field-contact-data"
+                  name="contact_data"
+                  rows="3"
+                ></textarea>
               </div>
               <button type="submit" class="btn btn-primary">
-                Guardar Mascota
+                Guardar Dueño
               </button>
             </form>
           </div>
@@ -206,7 +195,7 @@
             ></button>
           </div>
           <div class="modal-body">
-            ¿Estás seguro de que deseas eliminar esta mascota? Esta acción no se
+            ¿Estás seguro de que deseas eliminar este dueño? Esta acción no se
             puede deshacer.
           </div>
           <div class="modal-footer">
