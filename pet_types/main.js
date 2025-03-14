@@ -48,7 +48,7 @@ function initializeDataTable() {
       }
       const { data: petTypesData, count, error } = await query;
       if (error) {
-        showErrorToast("Error fetching pet types: " + error.message);
+        showErrorToast("Error al obtener tipos de mascota: " + error.message);
         return;
       }
       callback({
@@ -60,14 +60,14 @@ function initializeDataTable() {
     },
     columns: [
       {
-        title: "Name",
+        title: "Nombre",
         data: "name",
         render: (data, type, row, meta) => {
           return `<span class="searchable">${data}</span>`;
         },
       },
       {
-        title: "Registration Date",
+        title: "Fecha de Registro",
         data: "created_at",
         width: "1%",
         className: "text-nowrap",
@@ -83,7 +83,7 @@ function initializeDataTable() {
         },
       },
       {
-        title: "Actions",
+        title: "Acciones",
         width: "1%",
         className: "text-nowrap",
         orderable: false,
@@ -131,7 +131,7 @@ function initializeDataTable() {
     layout: {
       topStart: function () {
         let toolbar = document.createElement("div");
-        toolbar.innerHTML = `<button class="btn btn-primary" id="button-add-entity" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Add Pet Type</button>`;
+        toolbar.innerHTML = `<button class="btn btn-primary" id="button-add-entity" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Agregar Tipo de Mascota</button>`;
         return toolbar;
       },
     },
@@ -171,7 +171,7 @@ function setupEventListeners() {
 }
 
 function handleAddPetTypeClick() {
-  $("#modal-add-entity-label").text("Add Pet Type");
+  $("#modal-add-entity-label").text("Agregar Tipo de Mascota");
   $("#form-new-entity").trigger("reset").removeData("pet-type-id");
 }
 
@@ -180,7 +180,7 @@ function handleEditPetTypeClick() {
   const selectedData = table.row($(this).closest("tr")).data();
 
   if (selectedData) {
-    $("#modal-add-entity-label").text("Edit Pet Type");
+    $("#modal-add-entity-label").text("Editar Tipo de Mascota");
     $("#form-new-entity-field-name").val(selectedData.name);
     $("#form-new-entity").data("pet-type-id", id);
   }
@@ -205,9 +205,9 @@ async function handleConfirmDelete() {
       .eq("id", petTypeIdToDelete);
 
     if (error) {
-      showErrorToast("Error deleting pet type: " + error.message);
+      showErrorToast("Error al eliminar tipo de mascota: " + error.message);
     } else {
-      showSuccessToast("Pet type successfully deleted.");
+      showSuccessToast("Tipo de mascota eliminado exitosamente.");
       const closeButton = document.getElementById(
         "modal-delete-entity-button-close"
       );
@@ -246,11 +246,14 @@ async function handleFormSubmit(event) {
   const { error } = response;
   if (error) {
     showErrorToast(
-      "Error " + (id ? "updating" : "adding") + " pet type: " + error.message
+      "Error al " +
+        (id ? "actualizar" : "agregar") +
+        " tipo de mascota: " +
+        error.message
     );
   } else {
     showSuccessToast(
-      "Pet type " + (id ? "updated" : "added") + " successfully."
+      "Tipo de mascota " + (id ? "actualizado" : "agregado") + " exitosamente."
     );
     const closeButton = document.getElementById(
       "modal-add-entity-button-close"

@@ -48,7 +48,7 @@ function initializeDataTable() {
       }
       const { data: petStatesData, count, error } = await query;
       if (error) {
-        showErrorToast("Error fetching pet states: " + error.message);
+        showErrorToast("Error al obtener estados de mascota: " + error.message);
         return;
       }
       callback({
@@ -60,14 +60,14 @@ function initializeDataTable() {
     },
     columns: [
       {
-        title: "Name",
+        title: "Nombre",
         data: "name",
         render: (data, type, row, meta) => {
           return `<span class="searchable">${data}</span>`;
         },
       },
       {
-        title: "Registration Date",
+        title: "Fecha de Registro",
         data: "created_at",
         width: "1%",
         className: "text-nowrap",
@@ -83,7 +83,7 @@ function initializeDataTable() {
         },
       },
       {
-        title: "Actions",
+        title: "Acciones",
         width: "1%",
         className: "text-nowrap",
         orderable: false,
@@ -131,7 +131,7 @@ function initializeDataTable() {
     layout: {
       topStart: function () {
         let toolbar = document.createElement("div");
-        toolbar.innerHTML = `<button class="btn btn-primary" id="button-add-entity" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Add Pet State</button>`;
+        toolbar.innerHTML = `<button class="btn btn-primary" id="button-add-entity" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Agregar Estado de Mascota</button>`;
         return toolbar;
       },
     },
@@ -171,7 +171,7 @@ function setupEventListeners() {
 }
 
 function handleAddPetStateClick() {
-  $("#modal-add-entity-label").text("Add Pet State");
+  $("#modal-add-entity-label").text("Agregar Estado de Mascota");
   $("#form-new-entity").trigger("reset").removeData("pet-state-id");
 }
 
@@ -180,7 +180,7 @@ function handleEditPetStateClick() {
   const selectedData = table.row($(this).closest("tr")).data();
 
   if (selectedData) {
-    $("#modal-add-entity-label").text("Edit Pet State");
+    $("#modal-add-entity-label").text("Editar Estado de Mascota");
     $("#form-new-entity-field-name").val(selectedData.name);
     $("#form-new-entity").data("pet-state-id", id);
   }
@@ -205,9 +205,9 @@ async function handleConfirmDelete() {
       .eq("id", petStateIdToDelete);
 
     if (error) {
-      showErrorToast("Error deleting pet state: " + error.message);
+      showErrorToast("Error al eliminar estado de mascota: " + error.message);
     } else {
-      showSuccessToast("Pet state successfully deleted.");
+      showSuccessToast("Estado de mascota eliminado exitosamente.");
       const closeButton = document.getElementById(
         "modal-delete-entity-button-close"
       );
@@ -246,11 +246,16 @@ async function handleFormSubmit(event) {
   const { error } = response;
   if (error) {
     showErrorToast(
-      "Error " + (id ? "updating" : "adding") + " pet state: " + error.message
+      "Error al " +
+        (id ? "actualizar" : "agregar") +
+        " estado de mascota: " +
+        error.message
     );
   } else {
     showSuccessToast(
-      "Pet state " + (id ? "updated" : "added") + " successfully."
+      "Estado de mascota " +
+        (id ? "actualizado" : "agregado") +
+        " exitosamente."
     );
     const closeButton = document.getElementById(
       "modal-add-entity-button-close"

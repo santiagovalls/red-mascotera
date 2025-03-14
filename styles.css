@@ -1,0 +1,56 @@
+/* Estilos para DataTables */
+.dt-paging-button {
+  border-radius: 4px !important;
+}
+
+.dt-processing {
+  background-color: white;
+  border: 1px solid #ddd;
+  width: auto !important;
+  margin-left: 0px !important;
+  margin-top: 0px !important;
+  padding: 10px !important;
+}
+
+.dt-processing > div {
+  display: none;
+}
+
+/* Estilos para los botones de navegación */
+.navbar .nav-link {
+  border-radius: 4px;
+  margin: 0px 5px 0px 5px;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar .nav-link:hover {
+  background-color: #206bc4;
+  color: white !important;
+}
+
+.navbar .nav-link.active {
+  background-color: #206bc4;
+  color: white !important;
+}
+
+/* Estilos para los botones de acción */
+.btn-primary {
+  background-color: #206bc4;
+  border-color: #206bc4;
+}
+
+.btn-primary:hover {
+  background-color: #1a5aa3;
+  border-color: #1a5aa3;
+}
+
+/* Estilos para la tabla */
+.highlight {
+  background-color: yellow;
+}
+
+.searchable.highlight {
+  background-color: yellow;
+  font-weight: bold;
+}

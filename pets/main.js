@@ -29,7 +29,7 @@ async function fetchPetTypesAndStates() {
 
   if (petTypesResponse.error || petStatesResponse.error) {
     showErrorToast(
-      "Error fetching data: " +
+      "Error al obtener datos: " +
         (petTypesResponse.error || petStatesResponse.error).message
     );
     return [null, null];
@@ -91,7 +91,7 @@ function initializeDataTable() {
       }
       const { data: petsData, count, error } = await query;
       if (error) {
-        showErrorToast("Error fetching pets: " + error.message);
+        showErrorToast("Error al obtener mascotas: " + error.message);
         return;
       }
       callback({

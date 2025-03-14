@@ -52,7 +52,7 @@ function initializeDataTable() {
       }
       const { data: ownersData, count, error } = await query;
       if (error) {
-        showErrorToast("Error fetching owners: " + error.message);
+        showErrorToast("Error al obtener dueños: " + error.message);
         return;
       }
       callback({
@@ -73,21 +73,24 @@ function initializeDataTable() {
         },
       },
       {
-        title: "Name",
+        title: "Nombre",
         data: "name",
         render: (data, type, row, meta) => {
           return `<span class="searchable">${data}</span>`;
         },
       },
       {
-        title: "Contact Data",
+        title: "Datos de Contacto",
         data: "contact_data",
         render: (data, type, row, meta) => {
+          if (type === "display" && data) {
+            return data.replace(/\n/g, "<br />");
+          }
           return data ? data : "-";
         },
       },
       {
-        title: "Registration Date",
+        title: "Fecha de Registro",
         data: "created_at",
         width: "1%",
         className: "text-nowrap",
@@ -103,7 +106,7 @@ function initializeDataTable() {
         },
       },
       {
-        title: "Actions",
+        title: "Acciones",
         width: "1%",
         className: "text-nowrap",
         orderable: false,
@@ -200,7 +203,7 @@ function handleEditOwnerClick() {
   const selectedData = table.row($(this).closest("tr")).data();
 
   if (selectedData) {
-    $("#modal-add-entity-label").text("Edit Owner");
+    $("#modal-add-entity-label").text("Editar Dueño");
     $("#form-new-entity-field-dni").val(selectedData.dni);
     $("#form-new-entity-field-name").val(selectedData.name);
     $("#form-new-entity-field-contact-data").val(
@@ -226,9 +229,9 @@ async function handleConfirmDelete() {
       .eq("id", ownerIdToDelete);
 
     if (error) {
-      showErrorToast("Error deleting owner: " + error.message);
+      showErrorToast("Error al eliminar el dueño: " + error.message);
     } else {
-      showSuccessToast("Owner successfully deleted.");
+      showSuccessToast("Dueño eliminado exitosamente.");
       const closeButton = document.getElementById(
         "modal-delete-entity-button-close"
       );
@@ -266,7 +269,10 @@ async function handleFormSubmit(event) {
   const { error } = response;
   if (error) {
     showErrorToast(
-      "Error " + (id ? "updating" : "adding") + " owner: " + error.message
+      "Error al " +
+        (id ? "actualizar" : "agregar") +
+        " el dueño: " +
+        error.message
     );
   } else {
     showSuccessToast(

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Red Mascotera - Pet States</title>
+    <title>Red Mascotera - Estados de Mascota</title>
     <!-- CSS -->
     <link
       rel="stylesheet"
@@ -17,7 +17,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../styles.css" />
   </head>
   <body>
     <!-- Page -->
@@ -38,16 +38,16 @@
           </h1>
           <div class="navbar-nav flex-row">
             <div class="nav-item">
-              <a href="../pets/index.html" class="nav-link px-3">Pets</a>
+              <a href="../pets/index.html" class="nav-link px-3">Mascotas</a>
             </div>
             <div class="nav-item">
               <a href="../pet_types/index.html" class="nav-link px-3"
-                >Pet Types</a
+                >Tipos de Mascota</a
               >
             </div>
             <div class="nav-item">
               <a href="../pet_states/index.html" class="nav-link px-3 active"
-                >Pet States</a
+                >Estados de Mascota</a
               >
             </div>
             <div class="nav-item">
@@ -56,7 +56,7 @@
           </div>
           <div class="navbar-nav flex-row order-md-last">
             <div class="nav-item">
-              <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+              <a href="#" class="d-flex lh-1 text-reset p-0">
                 <img
                   src="../assets/images/icon-user.svg"
                   alt="User Icon"
@@ -65,7 +65,7 @@
                 />
                 <div class="d-none d-xl-block ps-2">
                   <div id="navbar-user-email">-</div>
-                  <div class="mt-1 small text-secondary">Administrator</div>
+                  <div class="mt-1 small text-secondary">Administrador</div>
                 </div>
               </a>
             </div>
@@ -112,7 +112,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modal-add-entity-label">
-              Add Pet State
+              Agregar Estado de Mascota
             </h5>
             <button
               type="button"
@@ -126,7 +126,7 @@
             <form id="form-new-entity">
               <div class="mb-3">
                 <label for="form-new-entity-field-name" class="form-label"
-                  >Pet State Name</label
+                  >Nombre del Estado</label
                 >
                 <input
                   type="text"
@@ -137,7 +137,7 @@
                 />
               </div>
               <button type="submit" class="btn btn-primary">
-                Save Pet State
+                Guardar Estado de Mascota
               </button>
             </form>
           </div>
@@ -157,7 +157,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modal-delete-entity-label">
-              Confirm Deletion
+              Confirmar Eliminación
             </h5>
             <button
               type="button"
@@ -168,8 +168,8 @@
             ></button>
           </div>
           <div class="modal-body">
-            Are you sure you want to delete this pet state? This action cannot
-            be undone.
+            ¿Estás seguro de que deseas eliminar este estado de mascota? Esta
+            acción no se puede deshacer.
           </div>
           <div class="modal-footer">
             <button
@@ -177,14 +177,14 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancel
+              Cancelar
             </button>
             <button
               type="button"
               class="btn btn-danger"
               id="modal-delete-entity-button-confirm"
             >
-              Delete
+              Eliminar
             </button>
           </div>
         </div>
