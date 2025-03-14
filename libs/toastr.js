@@ -21,7 +21,7 @@ export function showErrorToast(message) {
 }
 
 export function showSuccessToast(message) {
-  toastr.success(message.charAt(0).toUpperCase() + message.slice(1), "Success");
+  toastr.success(message.charAt(0).toUpperCase() + message.slice(1), "Éxito");
 }
 
 export function initializeToastr() {

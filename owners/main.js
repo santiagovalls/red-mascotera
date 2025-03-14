@@ -11,64 +11,10 @@ async function initializePage() {
   await checkUserToken();
   showLoadingState();
 
-  const [petTypes, petStates, owners] = await fetchPetTypesStatesAndOwners();
-  if (!petTypes || !petStates || !owners) return;
-  populateSelectOptions(petTypes, petStates, owners);
-
   table = initializeDataTable();
   setupEventListeners();
 
   hideLoadingState();
-}
-
-async function fetchPetTypesStatesAndOwners() {
-  const [petTypesResponse, petStatesResponse, ownersResponse] =
-    await Promise.all([
-      supabase.from("pet_types").select("*"),
-      supabase.from("pet_states").select("*"),
-      supabase.from("owners").select("*").order("name", { ascending: true }),
-    ]);
-
-  if (
-    petTypesResponse.error ||
-    petStatesResponse.error ||
-    ownersResponse.error
-  ) {
-    showErrorToast(
-      "Error al obtener datos: " +
-        (
-          petTypesResponse.error ||
-          petStatesResponse.error ||
-          ownersResponse.error
-        ).message
-    );
-    return [null, null, null];
-  }
-
-  return [petTypesResponse.data, petStatesResponse.data, ownersResponse.data];
-}
-
-function populateSelectOptions(petTypes, petStates, owners) {
-  petTypes.forEach((type) => {
-    $("#form-new-entity-field-type").append(
-      `<option value="${type.id}">${type.name}</option>`
-    );
-  });
-  petStates.forEach((state) => {
-    $("#form-new-entity-field-state").append(
-      `<option value="${state.id}">${state.name}</option>`
-    );
-  });
-  // Añadir opción vacía para el dueño
-  $("#form-new-entity-field-owner").append(
-    `<option value="">Seleccione un dueño</option>`
-  );
-  // Añadir opciones de dueños
-  owners.forEach((owner) => {
-    $("#form-new-entity-field-owner").append(
-      `<option value="${owner.id}">${owner.name} (${owner.dni})</option>`
-    );
-  });
 }
 
 function initializeDataTable() {
@@ -79,17 +25,14 @@ function initializeDataTable() {
       const limit = data.length;
       const offset = data.start;
       let query = supabase
-        .from("pets")
+        .from("owners")
         .select(
           `
           id,
           created_at,
+          dni,
           name,
-          tag,
-          pet_types (id, name),
-          pet_states (id, name),
-          owner_id,
-          owners (id, name, dni)
+          contact_data
         `,
           { count: "exact" }
         )
@@ -97,34 +40,38 @@ function initializeDataTable() {
       if (data.order[0]) {
         const orderColumn = data.order[0].column;
         const orderDirection = data.order[0].dir;
-        const columns = [
-          "name",
-          "tag",
-          "pet_types(name)",
-          "pet_states(name)",
-          "owners(name)",
-          "created_at",
-        ];
+        const columns = ["dni", "name", "contact_data", "created_at"];
         const columnToOrder = columns[orderColumn];
         query.order(columnToOrder, { ascending: orderDirection === "asc" });
       }
       const searchValue = data.search.value;
       if (searchValue) {
-        query = query.ilike("name", `%${searchValue}%`);
+        query = query.or(
+          `dni.ilike.%${searchValue}%,name.ilike.%${searchValue}%`
+        );
       }
-      const { data: petsData, count, error } = await query;
+      const { data: ownersData, count, error } = await query;
       if (error) {
-        showErrorToast("Error al obtener mascotas: " + error.message);
+        showErrorToast("Error al obtener dueños: " + error.message);
         return;
       }
       callback({
         draw: data.draw,
         recordsTotal: count,
         recordsFiltered: count,
-        data: petsData,
+        data: ownersData,
       });
     },
     columns: [
+      {
+        title: "DNI",
+        data: "dni",
+        width: "1%",
+        className: "text-nowrap",
+        render: (data, type, row, meta) => {
+          return `<span class="searchable">${data}</span>`;
+        },
+      },
       {
         title: "Nombre",
         data: "name",
@@ -133,22 +80,13 @@ function initializeDataTable() {
         },
       },
       {
-        title: "Etiqueta",
-        data: "tag",
-        width: "1%",
-        className: "text-nowrap",
+        title: "Datos de Contacto",
+        data: "contact_data",
         render: (data, type, row, meta) => {
-          return `<span class="badge bg-primary">${data}</span>`;
-        },
-      },
-      { title: "Tipo de Mascota", data: "pet_types.name" },
-      { title: "Estado de Adopción", data: "pet_states.name" },
-      {
-        title: "Dueño",
-        data: "owners",
-        render: (data, type, row, meta) => {
-          if (!data) return "-";
-          return `${data.name} (${data.dni})`;
+          if (type === "display" && data) {
+            return data.replace(/\n/g, "<br />");
+          }
+          return data ? data : "-";
         },
       },
       {
@@ -209,19 +147,19 @@ function initializeDataTable() {
     paging: true,
     searching: true,
     ordering: true,
-    order: [[0, "asc"]],
+    order: [[1, "asc"]],
     language: {
       url: "../assets/jsons/es-AR.json",
     },
     layout: {
       topStart: function () {
         let toolbar = document.createElement("div");
-        toolbar.innerHTML = `<button class="btn btn-primary" id="button-add-entity" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Agregar Mascota</button>`;
+        toolbar.innerHTML = `<button class="btn btn-primary" id="button-add-entity" data-bs-toggle="modal" data-bs-target="#modal-add-entity">Agregar Dueño</button>`;
         return toolbar;
       },
     },
   });
-  // Escuchar el evento de búsqueda para resaltar coincidencias
+  // Listen for search event to highlight matches
   table.on("draw.dt search.dt", function () {
     const searchTerm = table.search().toLowerCase();
     if (searchTerm) {
@@ -246,52 +184,54 @@ function initializeDataTable() {
 }
 
 function setupEventListeners() {
-  $(document).on("click", "#button-add-entity", handleAddPetClick);
-  $(document).on("click", "#button-edit-entity", handleEditPetClick);
-  $(document).on("click", "#button-delete-entity", handleDeletePetClick);
+  $(document).on("click", "#button-add-entity", handleAddOwnerClick);
+  $(document).on("click", "#button-edit-entity", handleEditOwnerClick);
+  $(document).on("click", "#button-delete-entity", handleDeleteOwnerClick);
   $("#modal-delete-entity-button-confirm").on("click", () =>
     handleConfirmDelete()
   );
   $("#form-new-entity").on("submit", (event) => handleFormSubmit(event));
 }
 
-function handleAddPetClick() {
-  $("#modal-add-entity-label").text("Agregar Mascota");
-  $("#form-new-entity").trigger("reset").removeData("pet-id");
+function handleAddOwnerClick() {
+  $("#modal-add-entity-label").text("Agregar Dueño");
+  $("#form-new-entity").trigger("reset").removeData("owner-id");
 }
 
-function handleEditPetClick() {
+function handleEditOwnerClick() {
   const id = $(this).data("id");
   const selectedData = table.row($(this).closest("tr")).data();
 
   if (selectedData) {
-    $("#modal-add-entity-label").text("Editar Mascota");
+    $("#modal-add-entity-label").text("Editar Dueño");
+    $("#form-new-entity-field-dni").val(selectedData.dni);
     $("#form-new-entity-field-name").val(selectedData.name);
-    $("#form-new-entity-field-tag").val(selectedData.tag);
-    $("#form-new-entity-field-type").val(selectedData.pet_types.id);
-    $("#form-new-entity-field-state").val(selectedData.pet_states.id);
-    $("#form-new-entity-field-owner").val(selectedData.owner_id || "");
-    $("#form-new-entity").data("pet-id", id);
+    $("#form-new-entity-field-contact-data").val(
+      selectedData.contact_data || ""
+    );
+    $("#form-new-entity").data("owner-id", id);
   }
 }
 
-function handleDeletePetClick() {
-  const petIdToDelete = $(this).data("id");
-  $("#modal-delete-entity-button-confirm").data("pet-id", petIdToDelete);
+function handleDeleteOwnerClick() {
+  const ownerIdToDelete = $(this).data("id");
+  $("#modal-delete-entity-button-confirm").data("owner-id", ownerIdToDelete);
 }
 
 async function handleConfirmDelete() {
-  const petIdToDelete = $("#modal-delete-entity-button-confirm").data("pet-id");
-  if (petIdToDelete) {
+  const ownerIdToDelete = $("#modal-delete-entity-button-confirm").data(
+    "owner-id"
+  );
+  if (ownerIdToDelete) {
     const { error } = await supabase
-      .from("pets")
+      .from("owners")
       .delete()
-      .eq("id", petIdToDelete);
+      .eq("id", ownerIdToDelete);
 
     if (error) {
-      showErrorToast("Error al eliminar la mascota: " + error.message);
+      showErrorToast("Error al eliminar el dueño: " + error.message);
     } else {
-      showSuccessToast("Mascota eliminada exitosamente.");
+      showSuccessToast("Dueño eliminado exitosamente.");
       const closeButton = document.getElementById(
         "modal-delete-entity-button-close"
       );
@@ -301,7 +241,7 @@ async function handleConfirmDelete() {
       const currentPage = table.page();
       const currentPageRecords = table.rows({ page: "current" }).count();
       table.ajax.reload(() => {
-        // Si la página actual quedó vacía después de eliminar, retrocedemos una página
+        // If current page is empty after deletion, go back one page
         if (currentPageRecords === 1 && currentPage > 0) {
           table.page(currentPage - 1).draw(false);
         }
@@ -312,20 +252,18 @@ async function handleConfirmDelete() {
 
 async function handleFormSubmit(event) {
   event.preventDefault();
-  const id = $("#form-new-entity").data("pet-id");
-  const updatedPet = {
+  const id = $("#form-new-entity").data("owner-id");
+  const updatedOwner = {
+    dni: $("#form-new-entity-field-dni").val(),
     name: $("#form-new-entity-field-name").val(),
-    tag: $("#form-new-entity-field-tag").val(),
-    pet_type_id: $("#form-new-entity-field-type").val(),
-    pet_state_id: $("#form-new-entity-field-state").val(),
-    owner_id: $("#form-new-entity-field-owner").val() || null,
+    contact_data: $("#form-new-entity-field-contact-data").val(),
   };
 
   let response;
   if (id) {
-    response = await supabase.from("pets").update(updatedPet).eq("id", id);
+    response = await supabase.from("owners").update(updatedOwner).eq("id", id);
   } else {
-    response = await supabase.from("pets").insert([updatedPet]);
+    response = await supabase.from("owners").insert([updatedOwner]);
   }
 
   const { error } = response;
@@ -333,12 +271,12 @@ async function handleFormSubmit(event) {
     showErrorToast(
       "Error al " +
         (id ? "actualizar" : "agregar") +
-        " la mascota: " +
+        " el dueño: " +
         error.message
     );
   } else {
     showSuccessToast(
-      "Mascota " + (id ? "actualizada" : "agregada") + " exitosamente."
+      "Dueño " + (id ? "actualizado" : "agregado") + " exitosamente."
     );
     const closeButton = document.getElementById(
       "modal-add-entity-button-close"
@@ -351,11 +289,11 @@ async function handleFormSubmit(event) {
 }
 
 function showLoadingState() {
-  $("#card-table-entity, #pets-form-card").hide();
+  $("#card-table-entity").hide();
   $("#loading-spinner").show();
 }
 
 function hideLoadingState() {
   $("#loading-spinner").hide();
-  $("#card-table-entity, #pets-form-card").show();
+  $("#card-table-entity").show();
 }
