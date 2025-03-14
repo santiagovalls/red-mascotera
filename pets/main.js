@@ -11,9 +11,9 @@ async function initializePage() {
   await checkUserToken();
   showLoadingState();
 
-  const [petTypes, petStates] = await fetchPetTypesAndStates();
-  if (!petTypes || !petStates) return;
-  populateSelectOptions(petTypes, petStates);
+  const [petTypes, petStates, owners] = await fetchPetTypesStatesAndOwners();
+  if (!petTypes || !petStates || !owners) return;
+  populateSelectOptions(petTypes, petStates, owners);
 
   table = initializeDataTable();
   setupEventListeners();
@@ -21,24 +21,34 @@ async function initializePage() {
   hideLoadingState();
 }
 
-async function fetchPetTypesAndStates() {
-  const [petTypesResponse, petStatesResponse] = await Promise.all([
-    supabase.from("pet_types").select("*"),
-    supabase.from("pet_states").select("*"),
-  ]);
+async function fetchPetTypesStatesAndOwners() {
+  const [petTypesResponse, petStatesResponse, ownersResponse] =
+    await Promise.all([
+      supabase.from("pet_types").select("*"),
+      supabase.from("pet_states").select("*"),
+      supabase.from("owners").select("*").order("name", { ascending: true }),
+    ]);
 
-  if (petTypesResponse.error || petStatesResponse.error) {
+  if (
+    petTypesResponse.error ||
+    petStatesResponse.error ||
+    ownersResponse.error
+  ) {
     showErrorToast(
       "Error al obtener datos: " +
-        (petTypesResponse.error || petStatesResponse.error).message
+        (
+          petTypesResponse.error ||
+          petStatesResponse.error ||
+          ownersResponse.error
+        ).message
     );
-    return [null, null];
+    return [null, null, null];
   }
 
-  return [petTypesResponse.data, petStatesResponse.data];
+  return [petTypesResponse.data, petStatesResponse.data, ownersResponse.data];
 }
 
-function populateSelectOptions(petTypes, petStates) {
+function populateSelectOptions(petTypes, petStates, owners) {
   petTypes.forEach((type) => {
     $("#form-new-entity-field-type").append(
       `<option value="${type.id}">${type.name}</option>`
@@ -47,6 +57,16 @@ function populateSelectOptions(petTypes, petStates) {
   petStates.forEach((state) => {
     $("#form-new-entity-field-state").append(
       `<option value="${state.id}">${state.name}</option>`
+    );
+  });
+  // Añadir opción vacía para el dueño
+  $("#form-new-entity-field-owner").append(
+    `<option value="">Seleccione un dueño</option>`
+  );
+  // Añadir opciones de dueños
+  owners.forEach((owner) => {
+    $("#form-new-entity-field-owner").append(
+      `<option value="${owner.id}">${owner.name} (${owner.dni})</option>`
     );
   });
 }
@@ -67,7 +87,9 @@ function initializeDataTable() {
           name,
           tag,
           pet_types (id, name),
-          pet_states (id, name)
+          pet_states (id, name),
+          owner_id,
+          owners (id, name, dni)
         `,
           { count: "exact" }
         )
@@ -80,6 +102,7 @@ function initializeDataTable() {
           "tag",
           "pet_types(name)",
           "pet_states(name)",
+          "owners(name)",
           "created_at",
         ];
         const columnToOrder = columns[orderColumn];
@@ -120,6 +143,14 @@ function initializeDataTable() {
       },
       { title: "Tipo de Mascota", data: "pet_types.name" },
       { title: "Estado de Adopción", data: "pet_states.name" },
+      {
+        title: "Dueño",
+        data: "owners",
+        render: (data, type, row, meta) => {
+          if (!data) return "-";
+          return `${data.name} (${data.dni})`;
+        },
+      },
       {
         title: "Fecha de Registro",
         data: "created_at",
@@ -178,7 +209,7 @@ function initializeDataTable() {
     paging: true,
     searching: true,
     ordering: true,
-    order: [[1, "asc"]],
+    order: [[0, "asc"]],
     language: {
       url: "../assets/jsons/es-AR.json",
     },
@@ -239,6 +270,7 @@ function handleEditPetClick() {
     $("#form-new-entity-field-tag").val(selectedData.tag);
     $("#form-new-entity-field-type").val(selectedData.pet_types.id);
     $("#form-new-entity-field-state").val(selectedData.pet_states.id);
+    $("#form-new-entity-field-owner").val(selectedData.owner_id || "");
     $("#form-new-entity").data("pet-id", id);
   }
 }
@@ -286,6 +318,7 @@ async function handleFormSubmit(event) {
     tag: $("#form-new-entity-field-tag").val(),
     pet_type_id: $("#form-new-entity-field-type").val(),
     pet_state_id: $("#form-new-entity-field-state").val(),
+    owner_id: $("#form-new-entity-field-owner").val() || null,
   };
 
   let response;
